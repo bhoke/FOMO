@@ -1,2 +1,6 @@
 __pycache__
-data
+dataset
+.venv
+*.keras
+tfrecords/
+.python-version

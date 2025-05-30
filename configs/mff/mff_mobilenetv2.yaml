@@ -1,0 +1,30 @@
+OUTPUT_DIR: 'output'
+LOG_DIR: 'log'
+WORKERS: 3
+
+DATASET:
+  NAME: 'mff'
+  ROOT: 'dataset'
+  TEST_SET: 'test'
+  TRAIN_SET: 'train'
+  NUM_CLASSES: 2
+  URL: 'https://www.kaggle.com/api/v1/datasets/download/berkanhoke/mediterranean-fruit-fly-images-dataset'
+  IMAGE_SIZE:
+  - 400
+  - 400
+MODEL:
+  BACKBONE: 'MobilenetV2'
+  PRETRAINED: 'imagenet'
+TRAIN:
+  IMAGE_SIZE:
+  - 224
+  - 224
+  AUGMENT: true
+  NUM_EPOCHS: 100
+  RESUME: false
+  OPTIMIZER: 'adam'
+  LR: 0.005
+  WD: 0.0005
+  MOMENTUM: 0.9
+  NESTEROV: false
+  BEST_SAVE_PATH: 'best.keras'
