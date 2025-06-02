@@ -1,5 +1,5 @@
 import argparse
-import os.path as osp
+import importlib
 
 import tensorflow as tf
 from keras import Model
@@ -10,8 +10,6 @@ from keras.callbacks import ModelCheckpoint
 
 import backbones
 from configs import config, update_config
-from dataloaders.mmf import MMFDataset
-
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Train FOMO network")
@@ -31,9 +29,11 @@ def parse_args():
 
 def main() -> Model:
     args = parse_args()
-
-    train_ds = MMFDataset(config, "train", augment = True)
-    val_ds = MMFDataset(config, "test", augment = False)
+    dataloader_module = importlib.import_module("dataloaders")
+    DatasetClass = getattr(dataloader_module, config.DATASET.NAME)
+    
+    train_ds = DatasetClass(config, "train", augment = True)
+    val_ds = DatasetClass(config, "test", augment = False)
 
     train_dataloader = (
         train_ds.load_dataset()
