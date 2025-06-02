@@ -4,12 +4,10 @@ import tensorflow as tf
 from .base import Dataset
 import json
 
-class MMFDataset(Dataset):
-    def __init__(self, cfg, dataset_type, augment):
-        super().__init__(cfg, dataset_type, augment)
-        self.cfg = cfg
-        self.image_dir = osp.join(cfg.DATASET.ROOT, cfg.DATASET.NAME, dataset_type)
-        json_path = osp.join(cfg.DATASET.ROOT, cfg.DATASET.NAME, f"{dataset_type}_labels.json")
+class MFFDataset(Dataset):
+    def __init__(self, cfg, sub_path, augment):
+        super().__init__(cfg, sub_path, augment)
+        json_path = osp.join(cfg.DATASET.ROOT, cfg.DATASET.NAME, f"{sub_path}_labels.json")
         with open(json_path, "r") as f:
             self.data = json.load(f)
         self.LABEL_DICT = {"fruitfly": 1}
@@ -20,7 +18,7 @@ class MMFDataset(Dataset):
 
         Args:
             root_dir (str): Path to dataset root directory.
-            dataset_type (str): 'train' or 'test'.
+            sub_path (str): name of folders which contain images.
             img_height (int): Desired image height after resizing.
             img_width (int): Desired image width after resizing.
 
@@ -33,21 +31,11 @@ class MMFDataset(Dataset):
             self.image_paths.append(osp.join(self.image_dir, filename))
             input2model_ratio = self.cfg.TRAIN.IMAGE_SIZE[0] / self.cfg.DATASET.IMAGE_SIZE[0]
             for bbox in file_info.get("boundingBoxes", []):
-                tl_x, tl_y, br_x, br_y, label = (
-                    max(int(bbox["x"]) * input2model_ratio // 8, 0),
-                    max(int(bbox["y"]) * input2model_ratio // 8, 0),
-                    min(
-                        int(bbox["x"]) * input2model_ratio // 8
-                        + int(bbox["width"]) // 8,
-                        self.cfg.TRAIN.IMAGE_SIZE[0] // 8 - 1,
-                    ),
-                    min(
-                        int(bbox["y"]) * input2model_ratio // 8
-                        + int(bbox["height"]) // 8,
-                        self.cfg.TRAIN.IMAGE_SIZE[1] // 8 - 1,
-                    ),
-                    int(self.LABEL_DICT[bbox["label"]]),
-                )
+                tl_x = int(bbox["x"]) * input2model_ratio // 8
+                tl_y = int(bbox["y"]) * input2model_ratio // 8
+                br_x = tl_x + int(bbox["width"]) * input2model_ratio // 8
+                br_y = tl_y + int(bbox["height"]) * input2model_ratio // 8
+                label = int(self.LABEL_DICT[bbox["label"]])
                 im_bboxes.append([tl_x, tl_y, br_x, br_y, label])
             self.bboxes_list.append(im_bboxes)
 
