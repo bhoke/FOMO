@@ -1,4 +1,4 @@
-from base import Dataset
+from .base import Dataset
 
 class COCODataset(Dataset):
     def __init__():

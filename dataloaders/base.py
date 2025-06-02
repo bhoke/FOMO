@@ -1,13 +1,19 @@
-import os
+import os.path as osp
+from utils import data_utils
 import json
 import random
 import tensorflow as tf
 from abc import abstractmethod
 
+
 class Dataset:
-    def __init__(self, cfg, dataset_type, augment=False):
+    def __init__(self, cfg, sub_path, augment=False):
         self.cfg = cfg
-        self.dataset_type =dataset_type
+        self.dataset_dir = osp.join(cfg.DATASET.ROOT, cfg.DATASET.NAME)
+        if not osp.exists(self.dataset_dir):
+            data_utils.download_dataset(cfg.DATASET.ROOT, cfg.DATASET.URL)
+        self.image_dir = osp.join(self.dataset_dir, sub_path)
+        self.sub_path = sub_path
         self.augment = augment
         self.image_paths = []
         self.bboxes_list = []
@@ -16,7 +22,7 @@ class Dataset:
     def load_dataset(self):
         pass
 
-    def _process_example(self,image_path, bboxes_list, augment=False):
+    def _process_example(self, image_path, bboxes_list, augment=False):
         # Read and decode image
         image = tf.io.read_file(image_path)
         image = tf.image.decode_jpeg(image, channels=3)
@@ -77,7 +83,7 @@ class Dataset:
 
 
 if __name__ == "__main__":
-    dataset_path = os.path.join(cfg.DATASET.ROOT, cfg.DATASET.NAME)
+    dataset_path = osp.join(cfg.DATASET.ROOT, cfg.DATASET.NAME)
     train_ds = load_dataset(dataset_path, "train")
     for img, (boxes, labels) in train_ds.take(1):
         print(img.shape, boxes, labels)
