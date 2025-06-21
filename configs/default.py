@@ -30,7 +30,7 @@ _C.DATASET.ROOT = 'dataset/'
 _C.DATASET.NAME = 'mff'
 _C.DATASET.NUM_CLASSES = 2
 _C.DATASET.TRAIN_SET = 'train'
-_C.DATASET.TEST_SET = 'test'
+_C.DATASET.VALIDATION_SET = 'val'
 _C.DATASET.URL = 'https://www.kaggle.com/api/v1/datasets/download/berkanhoke/mediterranean-fruit-fly-images-dataset'
 _C.DATASET.IMAGE_SIZE = (400, 400)  # width * height
 

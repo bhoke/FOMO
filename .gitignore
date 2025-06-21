@@ -4,3 +4,4 @@ dataset
 *.keras
 tfrecords/
 .python-version
+.vscode

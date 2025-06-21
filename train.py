@@ -32,8 +32,8 @@ def main() -> Model:
     dataloader_module = importlib.import_module("dataloaders")
     DatasetClass = getattr(dataloader_module, config.DATASET.NAME)
     
-    train_ds = DatasetClass(config, "train", augment = True)
-    val_ds = DatasetClass(config, "test", augment = False)
+    train_ds = DatasetClass(config, config.DATASET.TRAIN_SET, augment = True)
+    val_ds = DatasetClass(config, config.DATASET.VALIDATION_SET, augment = False)
 
     train_dataloader = (
         train_ds.load_dataset()

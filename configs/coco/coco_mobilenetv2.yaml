@@ -3,12 +3,12 @@ LOG_DIR: 'log'
 WORKERS: 3
 
 DATASET:
-  NAME: 'mff'
-  ROOT: 'dataset'
-  VALIDATION_SET: 'test'
-  TRAIN_SET: 'train'
+  NAME: 'coco'
+  ROOT: '/home/berko/Data'
+  VALIDATION_SET: 'val2017'
+  TRAIN_SET: 'train2017'
   NUM_CLASSES: 2
-  URL: 'https://www.kaggle.com/api/v1/datasets/download/berkanhoke/mediterranean-fruit-fly-images-dataset'
+  URL: 'https://www.kaggle.com/api/v1/datasets/download/awsaf49/coco-2017-dataset'
   IMAGE_SIZE:
   - 400
   - 400
@@ -27,4 +27,4 @@ TRAIN:
   WD: 0.0005
   MOMENTUM: 0.9
   NESTEROV: false
-  BEST_SAVE_PATH: 'best.keras'
+  BEST_SAVE_PATH: 'coco_best.keras'

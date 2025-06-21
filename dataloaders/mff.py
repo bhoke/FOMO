@@ -11,16 +11,11 @@ class MFFDataset(Dataset):
         with open(json_path, "r") as f:
             self.data = json.load(f)
         self.LABEL_DICT = {"fruitfly": 1}
+        self.bboxes_list = []
 
     def load_dataset(self):
         """
         Loads a tf.data.Dataset yielding (image, boxes) pairs.
-
-        Args:
-            root_dir (str): Path to dataset root directory.
-            sub_path (str): name of folders which contain images.
-            img_height (int): Desired image height after resizing.
-            img_width (int): Desired image width after resizing.
 
         Returns:
             tf.data.Dataset
@@ -43,7 +38,7 @@ class MFFDataset(Dataset):
         dataset = tf.data.Dataset.from_tensor_slices((self.image_paths, boxes_dense))
 
         dataset = dataset.map(
-            lambda img_path, bboxes: self._process_example(img_path, bboxes, self.augment),
+            lambda img_path, bboxes: self._bbox2segm(img_path, bboxes),
             num_parallel_calls=tf.data.AUTOTUNE,
         )
         return dataset
