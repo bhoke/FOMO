@@ -5,7 +5,7 @@ import tensorflow as tf
 from keras import Model
 from keras import optimizers
 from keras.layers import Softmax
-from keras.losses import MeanSquaredError
+from keras.losses import CategoricalCrossentropy
 from keras.callbacks import ModelCheckpoint
 
 import backbones
@@ -32,20 +32,8 @@ def main() -> Model:
     dataloader_module = importlib.import_module("dataloaders")
     DatasetClass = getattr(dataloader_module, config.DATASET.NAME)
     
-    train_ds = DatasetClass(config, config.DATASET.TRAIN_SET, augment = True)
-    val_ds = DatasetClass(config, config.DATASET.VALIDATION_SET, augment = False)
-
-    train_dataloader = (
-        train_ds.load_dataset()
-        .shuffle(config.TRAIN.BATCH_SIZE * 10)
-        .batch(config.TRAIN.BATCH_SIZE)
-        .prefetch(tf.data.AUTOTUNE)
-    )
-    val_dataloader = (
-        val_ds.load_dataset()
-        .batch(config.TRAIN.BATCH_SIZE)
-        .prefetch(tf.data.AUTOTUNE)
-    )
+    train_ds = DatasetClass(config, config.DATASET.TRAIN_SET, augment = True, workers = 4, use_multiprocessing = True)
+    val_ds = DatasetClass(config, config.DATASET.VALIDATION_SET, augment = False, workers = 4, use_multiprocessing = True)
 
     if config.MODEL.BACKBONE.lower() == "mobilenetv2":
         model = backbones.MobileFOMOv2(
@@ -70,15 +58,15 @@ def main() -> Model:
     callbacks = [
         ModelCheckpoint(config.TRAIN.BEST_SAVE_PATH, save_best_only=True, verbose=1)
     ]
-    model.compile(loss=MeanSquaredError(), optimizer=optim)
+    model.compile(loss=CategoricalCrossentropy(from_logits = True), optimizer=optim)
 
     model.fit(
-        train_dataloader,
+        train_ds,
         batch_size=config.TRAIN.BATCH_SIZE,
         callbacks=callbacks,
         epochs=config.TRAIN.NUM_EPOCHS,
         verbose=1,
-        validation_data=val_dataloader,
+        validation_data=val_ds,
     )
 
     #! Restore best weights.

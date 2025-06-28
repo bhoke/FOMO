@@ -10,15 +10,12 @@ DATASET:
   NUM_CLASSES: 2
   URL: 'https://www.kaggle.com/api/v1/datasets/download/berkanhoke/mediterranean-fruit-fly-images-dataset'
   IMAGE_SIZE:
-  - 400
-  - 400
+  - 224
+  - 224
 MODEL:
   BACKBONE: 'MobilenetV2'
   PRETRAINED: 'imagenet'
 TRAIN:
-  IMAGE_SIZE:
-  - 224
-  - 224
   AUGMENT: true
   NUM_EPOCHS: 100
   RESUME: false

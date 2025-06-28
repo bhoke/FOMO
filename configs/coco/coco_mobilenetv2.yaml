@@ -7,24 +7,22 @@ DATASET:
   ROOT: '/home/berko/Data'
   VALIDATION_SET: 'val2017'
   TRAIN_SET: 'train2017'
-  NUM_CLASSES: 2
+  NUM_CLASSES: 80
   URL: 'https://www.kaggle.com/api/v1/datasets/download/awsaf49/coco-2017-dataset'
   IMAGE_SIZE:
-  - 400
-  - 400
+  - 224
+  - 224
 MODEL:
   BACKBONE: 'MobilenetV2'
   PRETRAINED: 'imagenet'
 TRAIN:
-  IMAGE_SIZE:
-  - 224
-  - 224
   AUGMENT: true
   NUM_EPOCHS: 100
   RESUME: false
   OPTIMIZER: 'adam'
-  LR: 0.005
+  LR: 1e-5
   WD: 0.0005
   MOMENTUM: 0.9
   NESTEROV: false
   BEST_SAVE_PATH: 'coco_best.keras'
+  BATCH_SIZE: 64
