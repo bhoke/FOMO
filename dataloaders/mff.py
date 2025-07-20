@@ -18,6 +18,7 @@ class MFFDataset(keras.utils.PyDataset):
         self.image_dir = osp.join(cfg.DATASET.ROOT, cfg.DATASET.NAME, sub_path)
         self.num_classes = cfg.DATASET.NUM_CLASSES
         self.mask_size = tuple(size // 8 for size in self.img_size)
+        self.augment = augment
     
     def __len__(self):
         return math.ceil(len(self.data) / self.batch_size)
@@ -50,7 +51,6 @@ class MFFDataset(keras.utils.PyDataset):
         # if self.augment:
         #     seed = (random.randint(0, 10), random.randint(0, 10))
         #     image = tf.image.stateless_random_flip_left_right(image, seed)
-        #     image = tf.image.stateless_random_flip_up_down(image, seed)
         #     image = tf.image.random_brightness(image, 0.2)
         #     image = tf.image.random_contrast(image, 0.8, 1.2)
         #     image = tf.image.random_saturation(image, 0.8, 1.2)

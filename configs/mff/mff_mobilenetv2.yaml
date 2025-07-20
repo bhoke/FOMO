@@ -24,4 +24,7 @@ TRAIN:
   WD: 0.0005
   MOMENTUM: 0.9
   NESTEROV: false
+  CLASS_WEIGHTS:
+  - 1
+  - 100
   BEST_SAVE_PATH: 'best.keras'

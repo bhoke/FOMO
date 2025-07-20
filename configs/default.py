@@ -48,6 +48,7 @@ _C.TRAIN.NUM_EPOCHS = 100
 _C.TRAIN.RESUME = False
 _C.TRAIN.AUGMENT = True
 _C.TRAIN.BEST_SAVE_PATH = "best.keras"
+_C.TRAIN.CLASS_WEIGHTS = []
 
 # testing
 _C.TEST = CN()
