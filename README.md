@@ -17,6 +17,9 @@ Finally, you can run inference on any image using:
 
 `python predict.py`
 
+## Demo
+
+
 ## Supported Models
 - [x] MobileNetV2
 - [ ] Squeezenet
