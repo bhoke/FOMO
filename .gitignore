@@ -5,3 +5,4 @@ dataset
 tfrecords/
 .python-version
 .vscode
+*.h5
