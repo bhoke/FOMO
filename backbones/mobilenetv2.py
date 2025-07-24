@@ -101,7 +101,7 @@ def _inverted_res(inputs, expansion, stride, alpha, filters, block_id):
     )(x)
     x = BatchNormalization(
         epsilon=1e-3,
-        momentum=0.999,
+        momentum=0.9,
         name=prefix + "project_BN",
     )(x)
 
@@ -131,8 +131,7 @@ def MobileFOMOv2(input_shape, alpha, num_classes, weights=None):
     x = _inverted_res(x, filters=32, alpha=alpha, stride=1, expansion=6, block_id=4)
     x = _inverted_res(x, filters=32, alpha=alpha, stride=1, expansion=6, block_id=5)
     x = _inverted_res(x, filters=64, alpha=alpha, stride=2, expansion=6, block_id=6)
-    x = Conv2D(filters=16, kernel_size=1, strides=1, activation='relu', name='head_1')(x)
-    x = Conv2D(filters=16, kernel_size=1, strides=1, activation='relu', name='head_2')(x)
+    x = Conv2D(filters=32, kernel_size=1, strides=1, activation='relu', name='head')(x)
     logits = Conv2D(filters=num_classes, kernel_size=1, strides=1, activation="softmax", name='out')(x)
     model = Model(inputs=img_input, outputs=logits)
 
@@ -140,9 +139,7 @@ def MobileFOMOv2(input_shape, alpha, num_classes, weights=None):
         model_name = (
                 "mobilenet_v2_weights_tf_dim_ordering_tf_kernels_"
                 + str(float(alpha))
-                + "_"
-                + str(input_shape[1])
-                + "_no_top"
+                + "_224_no_top"
                 + ".h5"
             )
         weight_path = BASE_WEIGHT_PATH + model_name
@@ -153,6 +150,9 @@ def MobileFOMOv2(input_shape, alpha, num_classes, weights=None):
             model.load_weights(weights_path, by_name=True)
         except Exception:
             print ("Coul not get imagenet weights! Satrting with default weights!")
+    elif weights != None:
+        model.load_weights(weights)
+        print("Previous model restored")
 
     return model
 

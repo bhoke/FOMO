@@ -17,7 +17,7 @@ MODEL:
 TRAIN:
   AUGMENT: true
   NUM_EPOCHS: 100
-  RESUME: false
+  RESUME: true
   OPTIMIZER: 'adam'
   LR: 0.005
   WD: 0.0005

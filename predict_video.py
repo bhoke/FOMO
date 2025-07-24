@@ -7,30 +7,14 @@ from keras.applications import MobileNetV2
 
 
 model_path = "virat_mobilenetv2.keras"
-model = load_model(model_path)
-vid_path = "samples/vtest.avi"
+model = load_model(model_path, compile=False)
+vid_path = "samples/VIRAT_S_000200_06_001693_001824.mp4"
 cv2.namedWindow("win", cv2.WINDOW_FREERATIO)
 
 
-def img2tiles(image: np.ndarray):
-    # tiles config
-    tiles_height = 160
-    tiles_width = 160
-    num_y = int(image.shape[0] / tiles_height)
-    num_x = int(image.shape[1] / tiles_width)
-    new_width = num_x * tiles_width
-    new_height = num_y * tiles_height
-    new_img = np.zeros((num_x * num_y, tiles_height, tiles_width, 3))
-
-    for incre_i, i in enumerate(range(0, new_height, tiles_height)):
-        for incre_j, j in enumerate(range(0, new_width, tiles_width)):
-            windx = incre_j + incre_i * num_x
-            new_img[windx, ...] = image[i : i + tiles_height, j : j + tiles_width, :]
-
-    return new_img, num_x, num_y
-
-
 cap = cv2.VideoCapture(vid_path)
+fourcc = cv2.VideoWriter_fourcc(*"MP4V")
+vidWriter = cv2.VideoWriter("demos/VIRAT_S_000200_06_001693_001824.mp4", fourcc, 30.0, (640, 360))
 if not cap.isOpened():
     print("Cannot open video file")
     exit()
@@ -41,46 +25,52 @@ while True:
     if not ret:
         print("End of stream. Exiting ...")
         break
-    # frame = cv2.resize(frame, (frame.shape[1] // 2, frame.shape[0] // 2))
-    # height, width, _ = frame.shape
-    # hpad = 0
-    # vpad = 0
 
-    # if width < height:
-    #     new_width = round(240 * width / height)
-    #     new_height = 240
-    #     hpad = (new_height - new_width) // 2
-    # else:
-    #     new_width = 240
-    #     new_height = round(240 * height / width)
-    #     vpad = (new_width - new_height) // 2
+    height, width, _ = frame.shape
+    hpad = 0
+    vpad = 0
 
-    # cropped_frame = cv2.resize(frame[:,:,::-1], (new_width, new_height))
-    # cropped_frame = np.pad(cropped_frame, ((vpad, vpad), (hpad, hpad), (0,0)))
-    # height_ratio = height / new_height
-    # width_ratio = width / new_width
-    img, tiles_x, tiles_y = img2tiles(frame[..., ::-1])
+    if width < height:
+        new_width = round(640 * width / height)
+        new_height = 360
+        hpad = (640 - new_width) // 2
+    else:
+        new_width = 640
+        new_height = round(640 * height / width)
+        vpad = (360 - new_height) // 2
 
-    img = img.astype(np.float32) / 255.0
-    # result = model(np.expand_dims(img, 0))
+    resized_frame = cv2.resize(frame[:, :, ::-1], (new_width, new_height))
+    if vpad < 0:
+        resized_frame = resized_frame[-vpad : new_height + vpad, ...]
+        vpad = 0
+    elif hpad < 0:
+        resized_frame = resized_frame[:, -hpad : new_height + hpad, :]
+        hpad = 0
+    else:
+        resized_frame = np.pad(resized_frame, ((vpad, vpad), (hpad, hpad), (0, 0)))
+
+    img = resized_frame.astype(np.float32) / 255.0
     start = time_ns()
-    result = model(img)
+    result = model(np.expand_dims(img, 0))
     end = time_ns()
-    print("Model inference time: ", (end - start) / 1e+6)
+    print("Model inference time: ", (end - start) / 1e6)
     num_classes = result.shape[3]
-    for windx in range(result.shape[0]):
-        for ch in range(1, num_classes):
-            class_mask = result[windx, :, :, ch]
-            binary_label = class_mask > 0.1
-            y_coords, x_coords = np.where(binary_label)
-            tile_row = windx // tiles_x
-            tile_col = windx % tiles_x
-            x_coords = x_coords * 8 + 160 * tile_col
-            y_coords = y_coords * 8 + 160 * tile_row
-            for x, y in zip(x_coords, y_coords):
-                cv2.circle(frame, (x, y), 11, (0, 255, 0), -1)
+    for ch in range(1, num_classes):
+        color = [0, 0, 0]
+        color[ch] = 255
+        class_mask = result[0,..., ch]
+        binary_label = (class_mask > 0.9).numpy().astype(np.uint8)
+        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(binary_label, None, None, None)
+        center_idxs = np.where((stats[:,4] > 10) & (stats[:,4] < 30))
+        for x, y in centroids[center_idxs]:
+            cv2.circle(resized_frame, (int(x * 8 + hpad), int(y * 8 + vpad)), 7, color, 2)
 
-    cv2.imshow("win", frame)
+    vidWriter.write(resized_frame)
+    cv2.imshow("win", resized_frame[...,::-1])
     cv2.waitKey(1)
+    if cap.get(cv2.CAP_PROP_POS_FRAMES) > 150:
+        break
 
+vidWriter.release()
 cap.release()
+cv2.destroyAllWindows()

@@ -1,8 +1,6 @@
 __pycache__
 dataset
 .venv
-*.keras
 tfrecords/
 .python-version
 .vscode
-*.h5

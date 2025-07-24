@@ -2,10 +2,11 @@ import argparse
 import importlib
 
 import tensorflow as tf
-from keras import Model
+from keras import Model, ops
 from keras import optimizers
-from utils.losses import weighted_xent
-from keras.callbacks import ModelCheckpoint
+from utils.losses import weighted_dice_loss
+from keras.metrics import OneHotIoU
+from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 
 import backbones
 from configs import config, update_config
@@ -28,9 +29,11 @@ def parse_args():
 
 
 def get_model_by_name(model_name):
+    weights = config.TRAIN.BEST_SAVE_PATH if config.TRAIN.RESUME else "imagenet"
+
     if model_name == "mobilenetv2":
         model = backbones.MobileFOMOv2(
-            config.TRAIN.IMAGE_SIZE, 0.35, config.DATASET.NUM_CLASSES, "imagenet"
+            config.TRAIN.IMAGE_SIZE, 0.35, config.DATASET.NUM_CLASSES, weights
         )
     elif model_name == "squeezenet":
         model = backbones.SqueezeFOMO(
@@ -71,14 +74,27 @@ def main() -> Model:
         train_ds = train_ds.get_dataset()
         val_ds = val_ds.get_dataset()
 
-    model = get_model_by_name(config.MODEL.BACKBONE.lower())
+    model: Model = get_model_by_name(config.MODEL.BACKBONE.lower())
+    loss_fn = weighted_dice_loss(config.TRAIN.CLASS_WEIGHTS)
 
     optim: optimizers.Optimizer = optimizers.get(config.TRAIN.OPTIMIZER)
     optim.learning_rate = config.TRAIN.LR
+    model.compile(
+        loss=loss_fn,
+        optimizer=optim,
+        metrics=["acc", OneHotIoU(config.DATASET.NUM_CLASSES, [1, 2], "iou")],
+    )
+
     callbacks = [
-        ModelCheckpoint(config.TRAIN.BEST_SAVE_PATH, save_best_only=True, verbose=1)
+        ModelCheckpoint(
+            config.TRAIN.BEST_SAVE_PATH,
+            monitor="val_iou",
+            mode="max",
+            save_best_only=True,
+            verbose=1,
+        ),
+        LearningRateScheduler(lambda epoch, lr: float(lr * ops.exp(-0.1))),
     ]
-    model.compile(loss=weighted_xent(config.TRAIN.CLASS_WEIGHTS), optimizer=optim)
 
     model.fit(
         train_ds,
