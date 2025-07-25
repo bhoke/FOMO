@@ -44,16 +44,17 @@ def _inverted_res(inputs, expansion, stride, alpha, filters, block_id):
     pointwise_conv_filters = int(filters * alpha)
     # Ensure the number of filters on the last 1x1 convolution is divisible by
     # 8.
+    from keras.applications import MobileNetV2
     pointwise_filters = _make_divisible(pointwise_conv_filters, 8)
     prefix = f"block_{block_id}_"
     input_shape = inputs.shape
-    num_channels = input_shape[3]
+    in_channels = input_shape[3]
     x = inputs
 
     if block_id:
         # Expand with a pointwise 1x1 convolution.
         x = Conv2D(
-            expansion * 3,
+            expansion * in_channels,
             kernel_size=1,
             padding="same",
             use_bias=False,
@@ -62,7 +63,7 @@ def _inverted_res(inputs, expansion, stride, alpha, filters, block_id):
         )(inputs)
         x = BatchNormalization(
             epsilon=1e-3,
-            momentum=0.999,
+            momentum=0.9,
             name=prefix + "expand_BN",
         )(x)
         x = ReLU(6.0, name=prefix + "expand_relu")(x)
@@ -84,7 +85,7 @@ def _inverted_res(inputs, expansion, stride, alpha, filters, block_id):
     )(x)
     x = BatchNormalization(
         epsilon=1e-3,
-        momentum=0.999,
+        momentum=0.9,
         name=prefix + "depthwise_BN",
     )(x)
 
@@ -105,7 +106,7 @@ def _inverted_res(inputs, expansion, stride, alpha, filters, block_id):
         name=prefix + "project_BN",
     )(x)
 
-    if pointwise_filters == num_channels and stride == 1:
+    if pointwise_filters == in_channels and stride == 1:
         x = Add(name=prefix + "add")((x, inputs))
     return x
 
@@ -121,7 +122,7 @@ def MobileFOMOv2(input_shape, alpha, num_classes, weights=None):
         padding="same",
         use_bias=False,
     )(img_input)
-    x = BatchNormalization(epsilon=1e-3, momentum=0.999, name="bn_Conv1")(x)
+    x = BatchNormalization(epsilon=1e-3, momentum=0.9, name="bn_Conv1")(x)
     x = ReLU(6, name="Conv1_relu")(x)
 
     x = _inverted_res(x, filters=16, alpha=alpha, stride=1, expansion=1, block_id=0)
@@ -149,7 +150,7 @@ def MobileFOMOv2(input_shape, alpha, num_classes, weights=None):
             )
             model.load_weights(weights_path, by_name=True)
         except Exception:
-            print ("Coul not get imagenet weights! Satrting with default weights!")
+            print ("Could not get imagenet weights! Satrting with default weights!")
     elif weights != None:
         model.load_weights(weights)
         print("Previous model restored")

@@ -7,6 +7,7 @@ from keras import optimizers
 from utils.losses import weighted_dice_loss
 from keras.metrics import OneHotIoU
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler
+from utils.callbacks import cosine_annealing_with_warmup
 
 import backbones
 from configs import config, update_config
@@ -82,7 +83,7 @@ def main() -> Model:
     model.compile(
         loss=loss_fn,
         optimizer=optim,
-        metrics=["acc", OneHotIoU(config.DATASET.NUM_CLASSES, [1, 2], "iou")],
+        metrics=[OneHotIoU(config.DATASET.NUM_CLASSES, [1, 2], "iou")],
     )
 
     callbacks = [
@@ -93,7 +94,15 @@ def main() -> Model:
             save_best_only=True,
             verbose=1,
         ),
-        LearningRateScheduler(lambda epoch, lr: float(lr * ops.exp(-0.1))),
+        LearningRateScheduler(
+            lambda epoch, lr: cosine_annealing_with_warmup(
+                epoch,
+                lr,
+                total_epochs=config.TRAIN.NUM_EPOCHS,
+                warmup_epochs=5,
+                min_lr=1e-6,
+            )
+        ),
     ]
 
     model.fit(

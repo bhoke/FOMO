@@ -1,13 +1,14 @@
 import os.path as osp
 import math
 import json
+import random
 
 import numpy as np
 import keras
 import cv2
 
 class MFFDataset(keras.utils.PyDataset):
-    def __init__(self, cfg, sub_path, augment, **kwargs):
+    def __init__(self, cfg, sub_path, augment, shuffle = False, **kwargs):
         super().__init__(**kwargs)
         json_path = osp.join(cfg.DATASET.ROOT, cfg.DATASET.NAME, f"{sub_path}_labels.json")
         with open(json_path, "r") as f:
@@ -19,6 +20,9 @@ class MFFDataset(keras.utils.PyDataset):
         self.num_classes = cfg.DATASET.NUM_CLASSES
         self.mask_size = tuple(size // 8 for size in self.img_size)
         self.augment = augment
+        self.shuffle = shuffle
+        if shuffle:
+            random.shuffle(self.data)
     
     def __len__(self):
         return math.ceil(len(self.data) / self.batch_size)

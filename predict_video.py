@@ -13,7 +13,7 @@ cv2.namedWindow("win", cv2.WINDOW_FREERATIO)
 
 
 cap = cv2.VideoCapture(vid_path)
-fourcc = cv2.VideoWriter_fourcc(*"MP4V")
+fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 vidWriter = cv2.VideoWriter("demos/VIRAT_S_000200_06_001693_001824.mp4", fourcc, 30.0, (640, 360))
 if not cap.isOpened():
     print("Cannot open video file")
@@ -61,15 +61,14 @@ while True:
         class_mask = result[0,..., ch]
         binary_label = (class_mask > 0.9).numpy().astype(np.uint8)
         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(binary_label, None, None, None)
-        center_idxs = np.where((stats[:,4] > 10) & (stats[:,4] < 30))
-        for x, y in centroids[center_idxs]:
-            cv2.circle(resized_frame, (int(x * 8 + hpad), int(y * 8 + vpad)), 7, color, 2)
+        center_idxs = np.where((stats[1:,4] > 0))[0]
+        if (len(center_idxs) > 0):
+            for x, y in centroids[center_idxs + 1]:
+                cv2.circle(resized_frame, (int(x * 8 + hpad), int(y * 8 + vpad)), 7, color, 2)
 
     vidWriter.write(resized_frame)
     cv2.imshow("win", resized_frame[...,::-1])
     cv2.waitKey(1)
-    if cap.get(cv2.CAP_PROP_POS_FRAMES) > 150:
-        break
 
 vidWriter.release()
 cap.release()
