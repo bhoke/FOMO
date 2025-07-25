@@ -8,13 +8,13 @@ from keras.applications import MobileNetV2
 
 model_path = "virat_mobilenetv2.keras"
 model = load_model(model_path, compile=False)
-vid_path = "samples/VIRAT_S_000200_06_001693_001824.mp4"
+vid_path = "samples/VIRAT_S_000200_01_000226_000268.mp4"
 cv2.namedWindow("win", cv2.WINDOW_FREERATIO)
 
 
 cap = cv2.VideoCapture(vid_path)
 fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-vidWriter = cv2.VideoWriter("demos/VIRAT_S_000200_06_001693_001824.mp4", fourcc, 30.0, (640, 360))
+vidWriter = cv2.VideoWriter("demos/VIRAT_S_000200_01_000226_000268.mp4", fourcc, 30.0, (640, 360))
 if not cap.isOpened():
     print("Cannot open video file")
     exit()
@@ -66,7 +66,7 @@ while True:
             for x, y in centroids[center_idxs + 1]:
                 cv2.circle(resized_frame, (int(x * 8 + hpad), int(y * 8 + vpad)), 7, color, 2)
 
-    vidWriter.write(resized_frame)
+    vidWriter.write(resized_frame[...,::-1])
     cv2.imshow("win", resized_frame[...,::-1])
     cv2.waitKey(1)
 

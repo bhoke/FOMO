@@ -16,17 +16,17 @@ MODEL:
   PRETRAINED: 'imagenet'
 TRAIN:
   AUGMENT: true
-  NUM_EPOCHS: 100
+  NUM_EPOCHS: 20
   RESUME: true
   OPTIMIZER: 'adam'
-  LR: 0.005
+  LR: 0.001
   WD: 0.0005
   MOMENTUM: 0.9
   IMAGE_SIZE:
     - 360
     - 640
   NESTEROV: false
-  BATCH_SIZE: 32
+  BATCH_SIZE: 16
   CLASS_WEIGHTS:
     - 1
     - 100

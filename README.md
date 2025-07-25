@@ -18,11 +18,11 @@ Finally, you can run inference on any image using:
 `python predict.py`
 
 ## Demo
-
+![vtest](demos/vtest.gif)
+![VIRAT](demos/virat.gif)
 
 ## Supported Models
 - [x] MobileNetV2
-- [ ] Squeezenet
 - [ ] MobilenetV3
 - [ ] MobileViT
 

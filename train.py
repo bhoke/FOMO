@@ -83,7 +83,7 @@ def main() -> Model:
     model.compile(
         loss=loss_fn,
         optimizer=optim,
-        metrics=[OneHotIoU(config.DATASET.NUM_CLASSES, [1, 2], "iou")],
+        metrics=[OneHotIoU(config.DATASET.NUM_CLASSES, range(1, config.DATASET.NUM_CLASSES), "iou")],
     )
 
     callbacks = [
@@ -101,11 +101,12 @@ def main() -> Model:
                 total_epochs=config.TRAIN.NUM_EPOCHS,
                 warmup_epochs=5,
                 min_lr=1e-6,
+                max_lr = config.TRAIN.LR,
             )
         ),
     ]
 
-    model.fit(
+    history = model.fit(
         train_ds,
         batch_size=config.TRAIN.BATCH_SIZE,
         callbacks=callbacks,
