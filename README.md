@@ -23,7 +23,7 @@ Finally, you can run inference on any image using:
 
 ## Supported Models
 - [x] MobileNetV2
-- [ ] MobilenetV3
+- [x] MobilenetV3
 - [ ] MobileViT
 
 ## Performance

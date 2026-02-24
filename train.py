@@ -34,14 +34,16 @@ def get_model_by_name(model_name):
 
     if model_name == "mobilenetv2":
         model = backbones.MobileFOMOv2(
-            config.TRAIN.IMAGE_SIZE, 0.35, config.DATASET.NUM_CLASSES, weights
+            config.TRAIN.IMAGE_SIZE, config.MODEL.ALPHA, config.DATASET.NUM_CLASSES, weights
         )
     elif model_name == "squeezenet":
         model = backbones.SqueezeFOMO(
             config.TRAIN.IMAGE_SIZE, config.DATASET.NUM_CLASSES
         )
-    # elif model_name == "mobilenetv3":
-    #     print("Model not implemented yet")
+    elif model_name == "mobilenetv3":
+        model = backbones.MobileFOMOv3(
+            config.TRAIN.IMAGE_SIZE, config.MODEL.ALPHA, config.DATASET.NUM_CLASSES, weights
+        )
     # elif model_name == "mobilevit":
     #     print("Model not implemented yet")
     else:
