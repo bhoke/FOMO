@@ -44,8 +44,10 @@ def get_model_by_name(model_name):
         model = backbones.MobileFOMOv3(
             config.TRAIN.IMAGE_SIZE, config.MODEL.ALPHA, config.DATASET.NUM_CLASSES, weights
         )
-    # elif model_name == "mobilevit":
-    #     print("Model not implemented yet")
+    elif model_name == "mobilevit":
+        model = backbones.MobileFOMOViT(
+            config.TRAIN.IMAGE_SIZE, config.DATASET.NUM_CLASSES
+        )
     else:
         print("Invalid model name or model not implemented yet!")
         raise NotImplementedError
